@@ -1,0 +1,47 @@
+rules:
+  - id: logic_operator_replacement
+    name: Replace logic operators
+    pattern: '&&'
+    replacement: '||'
+  - id: logic_operator_replacement_2
+    name: Replace logic operators
+    pattern: '||'
+    replacement: '&&'
+  - id: comparison_operator_replacement
+    name: Replace comparison operators
+    pattern: '=='
+    replacement: '!='
+  - id: comparison_operator_replacement_2
+    name: Replace comparison operators
+    pattern: '!='
+    replacement: '=='
+  - id: comparison_operator_replacement_3
+    name: Replace comparison operators
+    pattern: '<'
+    replacement: '>='
+  - id: comparison_operator_replacement_4
+    name: Replace comparison operators
+    pattern: '>'
+    replacement: '<='
+  - id: string_mutation
+    name: String mutation
+    pattern: '"(.*)"'
+    replacement: '"mutated_string"'
+  - id: boolean_mutation
+    name: Replace true with false
+    pattern: 'true'
+    replacement: 'false'
+  - id: boolean_mutation_2
+    name: Replace false with true
+    pattern: 'false'
+    replacement: 'true'
+  - id: numeric_mutation
+    name: Numeric mutation
+    pattern: '([0-9]+)'
+    replacement: '999'
+
+exclude:
+  - "test/**"
+  - "**/*.g.dart"
+  - "**/*.freezed.dart"
+  - "lib/screens/**"

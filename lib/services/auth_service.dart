@@ -2,13 +2,24 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter/foundation.dart';
 
 class AuthService {
-  static String get _baseUrl => dotenv.env['API_URL'] ?? 'http://192.168.1.4:8080/api';
+  @visibleForTesting
+  static http.Client? mockClient;
 
-  static Future<String?> login(String email, String password) async {
+  static String get _baseUrl {
     try {
-      final response = await http.post(
+      return dotenv.env['API_URL'] ?? 'http://192.168.1.4:8080/api';
+    } catch (_) {
+      return 'http://192.168.1.4:8080/api';
+    }
+  }
+
+  static Future<String?> login(String email, String password, {http.Client? client}) async {
+    final httpClient = client ?? mockClient ?? http.Client();
+    try {
+      final response = await httpClient.post(
         Uri.parse('$_baseUrl/auth/login'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({'email': email, 'password': password}),
