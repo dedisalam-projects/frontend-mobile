@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'screens/login_screen.dart';
 import 'screens/dashboard_screen.dart';
 
@@ -9,8 +9,8 @@ void main() async {
   await dotenv.load(fileName: ".env");
   
   // Check if token exists
-  final prefs = await SharedPreferences.getInstance();
-  final token = prefs.getString('auth_token');
+  const storage = FlutterSecureStorage();
+  final token = await storage.read(key: 'auth_token');
   
   runApp(MyApp(initialRoute: token != null ? '/dashboard' : '/login'));
 }
@@ -35,7 +35,7 @@ class MyApp extends StatelessWidget {
       ),
       initialRoute: initialRoute,
       routes: {
-        '*login': (context) => const LoginScreen(),
+        '/login': (context) => const LoginScreen(),
         '/dashboard': (context) => const DashboardScreen(),
       },
     );
