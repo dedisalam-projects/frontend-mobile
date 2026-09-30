@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter/foundation.dart';
 
@@ -10,9 +10,14 @@ class AuthService {
 
   static String get _baseUrl {
     try {
-      return dotenv.env['API_URL'] ?? 'http://192.168.1.4:8080/api';
+      final url = dotenv.env['API_URL'];
+      if (url == null || url.isEmpty) {
+        throw Exception('API_URL not found in .env');
+      }
+      return url;
     } catch (_) {
-      return 'http://192.168.1.4:8080/api';
+      // Fallback domain in case .env is missing or invalid
+      return 'https://api.primeland.com/api/v1';
     }
   }
 
@@ -44,8 +49,8 @@ class AuthService {
           }
 
           if (token != null) {
-            final prefs = await SharedPreferences.getInstance();
-            await prefs.setString('auth_token', token);
+            const storage = FlutterSecureStorage();
+            await storage.write(key: 'auth_token', value: token);
             return null; // Success
           } else {
             // If token is completely handled by cookies, we can still consider it success
@@ -68,7 +73,7 @@ class AuthService {
   }
 
   static Future<void> logout() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.remove('auth_token');
+    const storage = FlutterSecureStorage();
+    await storage.delete(key: 'auth_token');
   }
 }
