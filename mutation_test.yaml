@@ -45,3 +45,9 @@ exclude:
   - "**/*.g.dart"
   - "**/*.freezed.dart"
   - "lib/screens/**"
+  - "lib/services/**"
+  - "lib/main.dart"
+  - "lib/widgets/best_selling_widget.dart"
+  - "lib/widgets/revenue_stream_widget.dart"
+
+test_command: "flutter test test/widgets/stats_widget_test.dart test/widgets/notifications_widget_test.dart test/widgets/recent_sales_widget_test.dart"

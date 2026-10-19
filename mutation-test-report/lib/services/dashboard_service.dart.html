@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+.collapsible {
+  color: black;
+  cursor: pointer;
+  padding: 0px;
+  width: 100%;
+  border: none;
+  text-align: left;
+  outline: none;
+}
+
+.hit {
+  background-color: #DAE7FE;
+}
+
+.covered {
+  background-color: #9EFF83;
+}
+.instrumented {
+  background-color: #FF8983;
+}
+
+.hit:hover {
+  color: white;
+  background-color: #6688D4;
+}
+
+.problem {
+  background-color: #FF6230;
+}
+
+.problem:hover {
+  background-color: #FF0000;
+}
+
+span.lineNumber
+{
+  display: inline-block;
+  color: black;
+  background-color: #EFE383;
+}
+
+.addedLine {
+background-color: rgb(200, 255, 200)
+}
+.changedTokens {
+background-color: rgb(50, 255, 50)
+}
+
+pre
+{
+  font-family: monospace;
+  white-space: pre;
+}
+
+pre.fileContents
+{
+  margin: 0px;
+}
+
+.content {
+  padding: 0 18px;
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.5s ease-out;
+  background-color: #f1f1f1;
+}
+table{
+    border-collapse: collapse;
+}
+
+hr.ruler
+{
+  height:3px;
+  border-width:0;
+  color:#6688D4;
+  background-color:#6688D4
+}
+td.title
+{
+  text-align: center;
+  padding-bottom: 10px;
+  font-family: Helvetica, sans-serif;
+  font-size: 20pt;
+  font-style: italic;
+  font-weight: bold;
+}
+td.footer {
+  text-align: center;
+  padding-bottom: 10px;
+  font-family: Helvetica, sans-serif;
+  font-size: 12pt;
+}
+
+td.ItemLabel
+{
+  text-align: right;
+  padding-right: 6px;
+  font-family: sans-serif;
+  font-weight: bold;
+  vertical-align: top;
+  white-space: nowrap;
+}
+
+td.mutationLabel
+{
+  text-align: right;
+  padding-right: 6px;
+  font-weight: bold;
+  vertical-align: top;
+}
+
+td.mutationText
+{
+  text-align: left;
+  vertical-align: top;
+}
+
+td.ItemText
+{
+  text-align: left;
+  padding-right: 6px;
+  font-family: sans-serif;
+  font-weight: bold;
+  color:#6688D4;
+  white-space: nowrap;
+}
+
+td.ItemReport
+{
+  text-align: right;
+  color: #284FA8;
+  font-family: sans-serif;
+  font-weight: bold;
+  white-space: nowrap;
+  padding-left: 6px;
+  padding-right: 6px;
+  background-color: #DAE7FE;
+  border-collapse: unset;
+  border: 2px;
+  border-color: white;
+  border-style: solid;
+}
+
+td.FileLink
+{
+  text-align: left;
+  color: #284FA8;
+  font-family: sans-serif;
+  font-weight: bold;
+  white-space: nowrap;
+  padding-left: 6px;
+  padding-right: 6px;
+  background-color: #DAE7FE;
+  border-collapse: unset;
+  border: 2px;
+  border-color: white;
+  border-style: solid;
+}
+
+td.ItemReportHigh
+{
+  text-align: right;
+  color: black;
+  font-family: sans-serif;
+  font-weight: bold;
+  white-space: nowrap;
+  padding-left: 6px;
+  padding-right: 6px;
+  background-color: #A7FC9D;
+  border-collapse: unset;
+  border: 2px;
+  border-color: white;
+  border-style: solid;
+}
+
+td.ItemReportMedium
+{
+  text-align: right;
+  color: black;
+  font-family: sans-serif;
+  font-weight: bold;
+  white-space: nowrap;
+  padding-left: 6px;
+  padding-right: 6px;
+  background-color: #FFEA20;
+  border-collapse: unset;
+  border: 2px;
+  border-color: white;
+  border-style: solid;
+}
+
+td.ItemReportLow
+{
+  text-align: right;
+  color: black;
+  font-family: sans-serif;
+  font-weight: bold;
+  white-space: nowrap;
+  padding-left: 6px;
+  padding-right: 6px;
+  background-color: #FF0000;
+  border-collapse: unset;
+  border: 2px;
+  border-color: white;
+  border-style: solid;
+}
+
+td.MiddleHeader
+{
+  text-align: center;
+  padding-right: 6px;
+  padding-left: 6px;
+  font-family: sans-serif;
+  white-space: nowrap;
+}
+
+td.ItemHead
+{
+  text-align: center;
+  color: white;
+  font-family: sans-serif;
+  font-weight: bold;
+  white-space: nowrap;
+  padding-left: 6px;
+  padding-right: 6px;
+  background-color: #6688D4;
+  border-collapse: unset;
+  border: 1px;
+  border-color: white;
+  border-style: solid;
+}
+
+td.barHi
+{
+  background-color: #00eb00;
+}
+
+td.barMed
+{
+  background-color: #FFEA20;
+}
+
+td.barLo
+{
+  background-color: #ff0000;
+}
+
+td.barBg
+{
+  background-color: #FFFFFF;
+}
+
+.match {
+  text-align: right;
+  position: relative;
+}
+
+.match .tooltip {
+  visibility: hidden;
+  background-color: #bbb;
+  color: black;
+  text-align: center;
+  border-radius: 6px;
+  padding: 5px 5px;
+  position: absolute;
+  z-index: 1;
+  top: 100%;
+  right: 0%;
+}
+
+.match:hover .tooltip {
+  visibility: visible;
+}
+
+@media (prefers-color-scheme: dark) {
+  body {
+    color: #c9d1d9;
+    background: #141517;
+  }
+  td.ItemReport, td.FileLink, td.ItemReportHigh, td.ItemReportMedium, td.ItemReportLow, td.ItemHead {
+    border-color: #152035;
+  }
+  td.ItemReport, td.FileLink {
+    color: #DAE7FE;
+    background-color: #141517;
+  }
+  td.ItemReportHigh, td.ItemReportMedium, td.ItemReportLow, td.barBg {
+    background-color: #141517;
+  }
+  td.ItemReportHigh {
+    color: #A7FC9D;
+  }
+  td.ItemReportMedium {
+    color: #FFEA20;
+  }
+  td.ItemReportLow {
+    color: #FF0000;
+  }
+  span.lineNumber {
+    color: white;
+    background-color: #26334F;
+  }
+  .collapsible {
+    color: #c9d1d9;
+  }
+  .content {
+    color: #c9d1d9;
+    background-color: #1B2539;
+  }
+  .hit {
+    background-color: #26334F;
+  }
+  .covered {
+    background-color: #0A3302;
+  }
+  .instrumented {
+    background-color: #391D1D;
+  }
+  .addedLine {
+    background-color: rgb(37, 83, 37);
+  }
+  .changedTokens {
+    background-color: rgb(32, 145, 32);
+  }
+  .problem {
+    background-color: #62200B;
+  }
+  a:link, a:visited  {
+	  color: #58a6ff;
+	}
+  .match .tooltip {
+    background-color: black;
+    color: #fff;
+  }
+}
+
+</style>
+</head>
+<body>
+<table width ="100%" cellspacing="0" border="0">
+    <tr><td class="title">Mutation test report</td></tr>
+     <tr><td><hr class="ruler"/></td></tr>
+
+     <tr>
+     <td width="100%">
+     <table width="100%" cellpadding="1" border="0">
+     <tbody><tr>
+     <td class="ItemLabel" width="10%">Current display:</td>
+     <td class="ItemText" width="35%">lib\services\dashboard_service.dart - <a href="../../mutation-test-report.html">back to top</a></td>
+     <td width="10%"></td>
+     <td class="MiddleHeader" width="15%">Detected</td>
+     <td class="MiddleHeader" width="15%">Total</td>
+     <td class="MiddleHeader" width="15%">Percentage</td>
+     </tr>
+
+     <tr>
+     <td class="ItemLabel" width="10%">Date:</td>
+     <td class="ItemText" width="35%">2026-09-21 00:46:03.346322</td>
+     <td class="ItemLabel" width="10%">Mutations:</td>
+     <td class="ItemReport" width="15%">25</td>
+     <td class="ItemReport" width="15%">25</td>
+     <td class="ItemReportHigh" width="15%">100.0 %</td>
+     </tr>
+     
+     <tr>
+     <td class="ItemLabel" width="10%">Builtin rules:</td>
+     <td class="ItemText" width="35%">true</td>
+     <td class="ItemLabel" width="10%">Blocked:</td>
+     <td class="ItemReport" width="15%">0</td>
+     <td class="ItemReport" width="15%">25</td>
+     <td class="ItemReportHigh" width="15%">0.0 %</td>
+     </tr>
+     </tbody>
+     </table>
+     </td>
+     </tr>
+     
+
+     
+     <tr><td><hr class="ruler"/></td></tr>
+</table>
+
+<pre class="fileHeader">          Source code</pre>
+<pre class="fileContents">
+<a name="1"><span class="lineNumber">       1 </span>import '../models/product.dart';</a>
+<a name="2"><span class="lineNumber">       2 </span></a>
+<a name="3"><span class="lineNumber">       3 </span>class DashboardService {</a>
+<a name="4"><span class="lineNumber"><span class="covered">       4 </span></span>  static Future&lt;List&lt;Product&gt;&gt; getRecentSales() async {</a>
+<a name="5"><span class="lineNumber">       5 </span>    // Simulate network delay</a>
+<a name="6"><button class="collapsible hit"><pre class="fileContents"><span class="lineNumber"><span class="covered">       6 </span></span>    await Future.delayed(const Duration(milliseconds: 500));</pre></button>
+<div class="content">
+<b>Detected mutations:</b>
+<table class="mutationTable" width="100%">
+<tr><td class="mutationLabel" width="5%">1 :</td><td class="mutationText" width="87%"><span class="addedLine">+     await Future.delayed(const Duration(milliseconds:<span class="changedTokens"> -500</span>));</span></td><td class="match">RegExp: pattern=([\s=\(])([1-9\.]+[0-9]+|0\.0*[1-9]) flags=m<span class="tooltip">Id: builtin.number.negative</span></td></tr></table>
+
+</div></a><a name="7"><span class="lineNumber"><span class="covered">       7 </span></span>    return [</a>
+<a name="8"><span class="lineNumber"><span class="covered">       8 </span></span>      Product(</a>
+<a name="9"><span class="lineNumber">       9 </span>        id: '1000',</a>
+<a name="10"><span class="lineNumber">      10 </span>        code: 'f230fh0g3',</a>
+<a name="11"><span class="lineNumber">      11 </span>        name: 'Bamboo Watch',</a>
+<a name="12"><span class="lineNumber">      12 </span>        description: 'Product Description',</a>
+<a name="13"><button class="collapsible hit"><pre class="fileContents"><span class="lineNumber">      13 </span>        image: 'bamboo-watch.jpg',</pre></button>
+<div class="content">
+<b>Detected mutations:</b>
+<table class="mutationTable" width="100%">
+<tr><td class="mutationLabel" width="5%">1 :</td><td class="mutationText" width="87%"><span class="addedLine">+         image: 'bamboo<span class="changedTokens">+w</span>atch.jpg',</span></td><td class="match">RegExp: pattern=-([^=]) flags=m<span class="tooltip">Id: builtin.arith.sub</span></td></tr></table>
+
+</div></a><a name="14"><button class="collapsible hit"><pre class="fileContents"><span class="lineNumber">      14 </span>        price: 65,</pre></button>
+<div class="content">
+<b>Detected mutations:</b>
+<table class="mutationTable" width="100%">
+<tr><td class="mutationLabel" width="5%">1 :</td><td class="mutationText" width="87%"><span class="addedLine">+         price:<span class="changedTokens"> -65</span>,</span></td><td class="match">RegExp: pattern=([\s=\(])([1-9\.]+[0-9]+|0\.0*[1-9]) flags=m<span class="tooltip">Id: builtin.number.negative</span></td></tr></table>
+
+</div></a><a name="15"><span class="lineNumber">      15 </span>        category: 'Accessories',</a>
+<a name="16"><button class="collapsible hit"><pre class="fileContents"><span class="lineNumber">      16 </span>        quantity: 24,</pre></button>
+<div class="content">
+<b>Detected mutations:</b>
+<table class="mutationTable" width="100%">
+<tr><td class="mutationLabel" width="5%">1 :</td><td class="mutationText" width="87%"><span class="addedLine">+         quantity:<span class="changedTokens"> -24</span>,</span></td><td class="match">RegExp: pattern=([\s=\(])([1-9\.]+[0-9]+|0\.0*[1-9]) flags=m<span class="tooltip">Id: builtin.number.negative</span></td></tr></table>
+
+</div></a><a name="17"><span class="lineNumber">      17 </span>        inventoryStatus: 'INSTOCK',</a>
+<a name="18"><span class="lineNumber">      18 </span>        rating: 5,</a>
+<a name="19"><span class="lineNumber">      19 </span>      ),</a>
+<a name="20"><span class="lineNumber"><span class="covered">      20 </span></span>      Product(</a>
+<a name="21"><span class="lineNumber">      21 </span>        id: '1001',</a>
+<a name="22"><span class="lineNumber">      22 </span>        code: 'nvklal433',</a>
+<a name="23"><span class="lineNumber">      23 </span>        name: 'Black Watch',</a>
+<a name="24"><span class="lineNumber">      24 </span>        description: 'Product Description',</a>
+<a name="25"><button class="collapsible hit"><pre class="fileContents"><span class="lineNumber">      25 </span>        image: 'black-watch.jpg',</pre></button>
+<div class="content">
+<b>Detected mutations:</b>
+<table class="mutationTable" width="100%">
+<tr><td class="mutationLabel" width="5%">1 :</td><td class="mutationText" width="87%"><span class="addedLine">+         image: 'black<span class="changedTokens">+w</span>atch.jpg',</span></td><td class="match">RegExp: pattern=-([^=]) flags=m<span class="tooltip">Id: builtin.arith.sub</span></td></tr></table>
+
+</div></a><a name="26"><button class="collapsible hit"><pre class="fileContents"><span class="lineNumber">      26 </span>        price: 72,</pre></button>
+<div class="content">
+<b>Detected mutations:</b>
+<table class="mutationTable" width="100%">
+<tr><td class="mutationLabel" width="5%">1 :</td><td class="mutationText" width="87%"><span class="addedLine">+         price:<span class="changedTokens"> -72</span>,</span></td><td class="match">RegExp: pattern=([\s=\(])([1-9\.]+[0-9]+|0\.0*[1-9]) flags=m<span class="tooltip">Id: builtin.number.negative</span></td></tr></table>
+
+</div></a><a name="27"><span class="lineNumber">      27 </span>        category: 'Accessories',</a>
+<a name="28"><button class="collapsible hit"><pre class="fileContents"><span class="lineNumber">      28 </span>        quantity: 61,</pre></button>
+<div class="content">
+<b>Detected mutations:</b>
+<table class="mutationTable" width="100%">
+<tr><td class="mutationLabel" width="5%">1 :</td><td class="mutationText" width="87%"><span class="addedLine">+         quantity:<span class="changedTokens"> -61</span>,</span></td><td class="match">RegExp: pattern=([\s=\(])([1-9\.]+[0-9]+|0\.0*[1-9]) flags=m<span class="tooltip">Id: builtin.number.negative</span></td></tr></table>
+
+</div></a><a name="29"><span class="lineNumber">      29 </span>        inventoryStatus: 'INSTOCK',</a>
+<a name="30"><span class="lineNumber">      30 </span>        rating: 4,</a>
+<a name="31"><span class="lineNumber">      31 </span>      ),</a>
+<a name="32"><span class="lineNumber"><span class="covered">      32 </span></span>      Product(</a>
+<a name="33"><span class="lineNumber">      33 </span>        id: '1002',</a>
+<a name="34"><span class="lineNumber">      34 </span>        code: 'zz21cz3c1',</a>
+<a name="35"><span class="lineNumber">      35 </span>        name: 'Blue Band',</a>
+<a name="36"><span class="lineNumber">      36 </span>        description: 'Product Description',</a>
+<a name="37"><button class="collapsible hit"><pre class="fileContents"><span class="lineNumber">      37 </span>        image: 'blue-band.jpg',</pre></button>
+<div class="content">
+<b>Detected mutations:</b>
+<table class="mutationTable" width="100%">
+<tr><td class="mutationLabel" width="5%">1 :</td><td class="mutationText" width="87%"><span class="addedLine">+         image: 'blue<span class="changedTokens">+b</span>and.jpg',</span></td><td class="match">RegExp: pattern=-([^=]) flags=m<span class="tooltip">Id: builtin.arith.sub</span></td></tr></table>
+
+</div></a><a name="38"><button class="collapsible hit"><pre class="fileContents"><span class="lineNumber">      38 </span>        price: 79,</pre></button>
+<div class="content">
+<b>Detected mutations:</b>
+<table class="mutationTable" width="100%">
+<tr><td class="mutationLabel" width="5%">1 :</td><td class="mutationText" width="87%"><span class="addedLine">+         price:<span class="changedTokens"> -79</span>,</span></td><td class="match">RegExp: pattern=([\s=\(])([1-9\.]+[0-9]+|0\.0*[1-9]) flags=m<span class="tooltip">Id: builtin.number.negative</span></td></tr></table>
+
+</div></a><a name="39"><span class="lineNumber">      39 </span>        category: 'Fitness',</a>
+<a name="40"><span class="lineNumber">      40 </span>        quantity: 2,</a>
+<a name="41"><span class="lineNumber">      41 </span>        inventoryStatus: 'LOWSTOCK',</a>
+<a name="42"><span class="lineNumber">      42 </span>        rating: 3,</a>
+<a name="43"><span class="lineNumber">      43 </span>      ),</a>
+<a name="44"><span class="lineNumber"><span class="covered">      44 </span></span>      Product(</a>
+<a name="45"><span class="lineNumber">      45 </span>        id: '1003',</a>
+<a name="46"><span class="lineNumber">      46 </span>        code: '244wgerg2',</a>
+<a name="47"><button class="collapsible hit"><pre class="fileContents"><span class="lineNumber">      47 </span>        name: 'Blue T-Shirt',</pre></button>
+<div class="content">
+<b>Detected mutations:</b>
+<table class="mutationTable" width="100%">
+<tr><td class="mutationLabel" width="5%">1 :</td><td class="mutationText" width="87%"><span class="addedLine">+         name: 'Blue T<span class="changedTokens">+S</span>hirt',</span></td><td class="match">RegExp: pattern=-([^=]) flags=m<span class="tooltip">Id: builtin.arith.sub</span></td></tr></table>
+
+</div></a><a name="48"><span class="lineNumber">      48 </span>        description: 'Product Description',</a>
+<a name="49"><button class="collapsible hit"><pre class="fileContents"><span class="lineNumber">      49 </span>        image: 'blue-t-shirt.jpg',</pre></button>
+<div class="content">
+<b>Detected mutations:</b>
+<table class="mutationTable" width="100%">
+<tr><td class="mutationLabel" width="5%">1 :</td><td class="mutationText" width="87%"><span class="addedLine">+         image: 'blue<span class="changedTokens">+t</span>-shirt.jpg',</span></td><td class="match">RegExp: pattern=-([^=]) flags=m<span class="tooltip">Id: builtin.arith.sub</span></td></tr><tr><td colspan="3"><hr class="ruler"/></td></tr><tr><td class="mutationLabel" width="5%">2 :</td><td class="mutationText" width="87%"><span class="addedLine">+         image: 'blue-t<span class="changedTokens">+s</span>hirt.jpg',</span></td><td class="match">RegExp: pattern=-([^=]) flags=m<span class="tooltip">Id: builtin.arith.sub</span></td></tr></table>
+
+</div></a><a name="50"><button class="collapsible hit"><pre class="fileContents"><span class="lineNumber">      50 </span>        price: 29,</pre></button>
+<div class="content">
+<b>Detected mutations:</b>
+<table class="mutationTable" width="100%">
+<tr><td class="mutationLabel" width="5%">1 :</td><td class="mutationText" width="87%"><span class="addedLine">+         price:<span class="changedTokens"> -29</span>,</span></td><td class="match">RegExp: pattern=([\s=\(])([1-9\.]+[0-9]+|0\.0*[1-9]) flags=m<span class="tooltip">Id: builtin.number.negative</span></td></tr></table>
+
+</div></a><a name="51"><span class="lineNumber">      51 </span>        category: 'Clothing',</a>
+<a name="52"><button class="collapsible hit"><pre class="fileContents"><span class="lineNumber">      52 </span>        quantity: 25,</pre></button>
+<div class="content">
+<b>Detected mutations:</b>
+<table class="mutationTable" width="100%">
+<tr><td class="mutationLabel" width="5%">1 :</td><td class="mutationText" width="87%"><span class="addedLine">+         quantity:<span class="changedTokens"> -25</span>,</span></td><td class="match">RegExp: pattern=([\s=\(])([1-9\.]+[0-9]+|0\.0*[1-9]) flags=m<span class="tooltip">Id: builtin.number.negative</span></td></tr></table>
+
+</div></a><a name="53"><span class="lineNumber">      53 </span>        inventoryStatus: 'INSTOCK',</a>
+<a name="54"><span class="lineNumber">      54 </span>        rating: 5,</a>
+<a name="55"><span class="lineNumber">      55 </span>      ),</a>
+<a name="56"><span class="lineNumber"><span class="covered">      56 </span></span>      Product(</a>
+<a name="57"><span class="lineNumber">      57 </span>        id: '1004',</a>
+<a name="58"><span class="lineNumber">      58 </span>        code: 'h456wer53',</a>
+<a name="59"><span class="lineNumber">      59 </span>        name: 'Bracelet',</a>
+<a name="60"><span class="lineNumber">      60 </span>        description: 'Product Description',</a>
+<a name="61"><span class="lineNumber">      61 </span>        image: 'bracelet.jpg',</a>
+<a name="62"><button class="collapsible hit"><pre class="fileContents"><span class="lineNumber">      62 </span>        price: 15,</pre></button>
+<div class="content">
+<b>Detected mutations:</b>
+<table class="mutationTable" width="100%">
+<tr><td class="mutationLabel" width="5%">1 :</td><td class="mutationText" width="87%"><span class="addedLine">+         price:<span class="changedTokens"> -15</span>,</span></td><td class="match">RegExp: pattern=([\s=\(])([1-9\.]+[0-9]+|0\.0*[1-9]) flags=m<span class="tooltip">Id: builtin.number.negative</span></td></tr></table>
+
+</div></a><a name="63"><span class="lineNumber">      63 </span>        category: 'Accessories',</a>
+<a name="64"><button class="collapsible hit"><pre class="fileContents"><span class="lineNumber">      64 </span>        quantity: 73,</pre></button>
+<div class="content">
+<b>Detected mutations:</b>
+<table class="mutationTable" width="100%">
+<tr><td class="mutationLabel" width="5%">1 :</td><td class="mutationText" width="87%"><span class="addedLine">+         quantity:<span class="changedTokens"> -73</span>,</span></td><td class="match">RegExp: pattern=([\s=\(])([1-9\.]+[0-9]+|0\.0*[1-9]) flags=m<span class="tooltip">Id: builtin.number.negative</span></td></tr></table>
+
+</div></a><a name="65"><span class="lineNumber">      65 </span>        inventoryStatus: 'INSTOCK',</a>
+<a name="66"><span class="lineNumber">      66 </span>        rating: 4,</a>
+<a name="67"><span class="lineNumber">      67 </span>      ),</a>
+<a name="68"><span class="lineNumber">      68 </span>    ];</a>
+<a name="69"><span class="lineNumber">      69 </span>  }</a>
+<a name="70"><span class="lineNumber">      70 </span></a>
+<a name="71"><span class="lineNumber"><span class="covered">      71 </span></span>  static Future&lt;List&lt;Product&gt;&gt; getBestSelling() async {</a>
+<a name="72"><span class="lineNumber">      72 </span>    // Simulate network delay</a>
+<a name="73"><button class="collapsible hit"><pre class="fileContents"><span class="lineNumber"><span class="covered">      73 </span></span>    await Future.delayed(const Duration(milliseconds: 500));</pre></button>
+<div class="content">
+<b>Detected mutations:</b>
+<table class="mutationTable" width="100%">
+<tr><td class="mutationLabel" width="5%">1 :</td><td class="mutationText" width="87%"><span class="addedLine">+     await Future.delayed(const Duration(milliseconds:<span class="changedTokens"> -500</span>));</span></td><td class="match">RegExp: pattern=([\s=\(])([1-9\.]+[0-9]+|0\.0*[1-9]) flags=m<span class="tooltip">Id: builtin.number.negative</span></td></tr></table>
+
+</div></a><a name="74"><span class="lineNumber"><span class="covered">      74 </span></span>    return [</a>
+<a name="75"><span class="lineNumber"><span class="covered">      75 </span></span>      Product(</a>
+<a name="76"><span class="lineNumber">      76 </span>        id: '1011',</a>
+<a name="77"><span class="lineNumber">      77 </span>        code: '4920nnc2d',</a>
+<a name="78"><span class="lineNumber">      78 </span>        name: 'Green Earbuds',</a>
+<a name="79"><span class="lineNumber">      79 </span>        description: 'Product Description',</a>
+<a name="80"><button class="collapsible hit"><pre class="fileContents"><span class="lineNumber">      80 </span>        image: 'green-earbuds.jpg',</pre></button>
+<div class="content">
+<b>Detected mutations:</b>
+<table class="mutationTable" width="100%">
+<tr><td class="mutationLabel" width="5%">1 :</td><td class="mutationText" width="87%"><span class="addedLine">+         image: 'green<span class="changedTokens">+e</span>arbuds.jpg',</span></td><td class="match">RegExp: pattern=-([^=]) flags=m<span class="tooltip">Id: builtin.arith.sub</span></td></tr></table>
+
+</div></a><a name="81"><button class="collapsible hit"><pre class="fileContents"><span class="lineNumber">      81 </span>        price: 89,</pre></button>
+<div class="content">
+<b>Detected mutations:</b>
+<table class="mutationTable" width="100%">
+<tr><td class="mutationLabel" width="5%">1 :</td><td class="mutationText" width="87%"><span class="addedLine">+         price:<span class="changedTokens"> -89</span>,</span></td><td class="match">RegExp: pattern=([\s=\(])([1-9\.]+[0-9]+|0\.0*[1-9]) flags=m<span class="tooltip">Id: builtin.number.negative</span></td></tr></table>
+
+</div></a><a name="82"><span class="lineNumber">      82 </span>        category: 'Electronics',</a>
+<a name="83"><button class="collapsible hit"><pre class="fileContents"><span class="lineNumber">      83 </span>        quantity: 23,</pre></button>
+<div class="content">
+<b>Detected mutations:</b>
+<table class="mutationTable" width="100%">
+<tr><td class="mutationLabel" width="5%">1 :</td><td class="mutationText" width="87%"><span class="addedLine">+         quantity:<span class="changedTokens"> -23</span>,</span></td><td class="match">RegExp: pattern=([\s=\(])([1-9\.]+[0-9]+|0\.0*[1-9]) flags=m<span class="tooltip">Id: builtin.number.negative</span></td></tr></table>
+
+</div></a><a name="84"><span class="lineNumber">      84 </span>        inventoryStatus: 'INSTOCK',</a>
+<a name="85"><span class="lineNumber">      85 </span>        rating: 4,</a>
+<a name="86"><span class="lineNumber">      86 </span>      ),</a>
+<a name="87"><span class="lineNumber"><span class="covered">      87 </span></span>      Product(</a>
+<a name="88"><span class="lineNumber">      88 </span>        id: '1012',</a>
+<a name="89"><span class="lineNumber">      89 </span>        code: '250vm23cc',</a>
+<a name="90"><button class="collapsible hit"><pre class="fileContents"><span class="lineNumber">      90 </span>        name: 'Green T-Shirt',</pre></button>
+<div class="content">
+<b>Detected mutations:</b>
+<table class="mutationTable" width="100%">
+<tr><td class="mutationLabel" width="5%">1 :</td><td class="mutationText" width="87%"><span class="addedLine">+         name: 'Green T<span class="changedTokens">+S</span>hirt',</span></td><td class="match">RegExp: pattern=-([^=]) flags=m<span class="tooltip">Id: builtin.arith.sub</span></td></tr></table>
+
+</div></a><a name="91"><span class="lineNumber">      91 </span>        description: 'Product Description',</a>
+<a name="92"><button class="collapsible hit"><pre class="fileContents"><span class="lineNumber">      92 </span>        image: 'green-t-shirt.jpg',</pre></button>
+<div class="content">
+<b>Detected mutations:</b>
+<table class="mutationTable" width="100%">
+<tr><td class="mutationLabel" width="5%">1 :</td><td class="mutationText" width="87%"><span class="addedLine">+         image: 'green<span class="changedTokens">+t</span>-shirt.jpg',</span></td><td class="match">RegExp: pattern=-([^=]) flags=m<span class="tooltip">Id: builtin.arith.sub</span></td></tr><tr><td colspan="3"><hr class="ruler"/></td></tr><tr><td class="mutationLabel" width="5%">2 :</td><td class="mutationText" width="87%"><span class="addedLine">+         image: 'green-t<span class="changedTokens">+s</span>hirt.jpg',</span></td><td class="match">RegExp: pattern=-([^=]) flags=m<span class="tooltip">Id: builtin.arith.sub</span></td></tr></table>
+
+</div></a><a name="93"><button class="collapsible hit"><pre class="fileContents"><span class="lineNumber">      93 </span>        price: 49,</pre></button>
+<div class="content">
+<b>Detected mutations:</b>
+<table class="mutationTable" width="100%">
+<tr><td class="mutationLabel" width="5%">1 :</td><td class="mutationText" width="87%"><span class="addedLine">+         price:<span class="changedTokens"> -49</span>,</span></td><td class="match">RegExp: pattern=([\s=\(])([1-9\.]+[0-9]+|0\.0*[1-9]) flags=m<span class="tooltip">Id: builtin.number.negative</span></td></tr></table>
+
+</div></a><a name="94"><span class="lineNumber">      94 </span>        category: 'Clothing',</a>
+<a name="95"><button class="collapsible hit"><pre class="fileContents"><span class="lineNumber">      95 </span>        quantity: 74,</pre></button>
+<div class="content">
+<b>Detected mutations:</b>
+<table class="mutationTable" width="100%">
+<tr><td class="mutationLabel" width="5%">1 :</td><td class="mutationText" width="87%"><span class="addedLine">+         quantity:<span class="changedTokens"> -74</span>,</span></td><td class="match">RegExp: pattern=([\s=\(])([1-9\.]+[0-9]+|0\.0*[1-9]) flags=m<span class="tooltip">Id: builtin.number.negative</span></td></tr></table>
+
+</div></a><a name="96"><span class="lineNumber">      96 </span>        inventoryStatus: 'INSTOCK',</a>
+<a name="97"><span class="lineNumber">      97 </span>        rating: 5,</a>
+<a name="98"><span class="lineNumber">      98 </span>      ),</a>
+<a name="99"><span class="lineNumber">      99 </span>    ];</a>
+<a name="100"><span class="lineNumber">     100 </span>  }</a>
+<a name="101"><span class="lineNumber">     101 </span>}</a>
+<a name="102"><span class="lineNumber">     102 </span></a>
+</pre>
+<script>
+var coll = document.getElementsByClassName("collapsible");
+var i;
+
+for (i = 0; i < coll.length; i++) {
+  coll[i].addEventListener("click", function() {
+    this.classList.toggle("active");
+    var content = this.nextElementSibling;
+    if (content.style.maxHeight){
+      content.style.maxHeight = null;
+    } else {
+      content.style.maxHeight = content.scrollHeight + "px";
+    }
+	for (k = 0; k < coll.length; k++) {
+      var content2 = coll[k].nextElementSibling;
+      if (content2.style.maxHeight && content.parentElement == content2){
+      content2.style.maxHeight = content2.scrollHeight + content.scrollHeight + "px";
+    }
+      
+    }
+    
+  });
+}
+</script><table width ="100%" cellspacing="0" border="0">
+  <tr><td><hr class="ruler"/></td></tr>
+  <tr><td class="footer">Generated by mutation-test version: 1.8.1</td></tr>
+</table>
+</body>
+</html>

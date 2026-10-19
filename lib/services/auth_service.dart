@@ -22,8 +22,8 @@ class AuthService {
   }
 
   static Future<String?> login(String email, String password, {http.Client? client}) async {
-    final httpClient = client ?? mockClient ?? http.Client();
     try {
+      final httpClient = client ?? mockClient ?? http.Client();
       final response = await httpClient.post(
         Uri.parse('$_baseUrl/auth/login'),
         headers: {'Content-Type': 'application/json'},

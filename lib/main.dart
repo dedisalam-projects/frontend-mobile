@@ -4,7 +4,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'screens/login_screen.dart';
 import 'screens/dashboard_screen.dart';
 
-void main() async {
+Future<void> main({void Function(Widget)? appRunner}) async {
   WidgetsFlutterBinding.ensureInitialized();
   await dotenv.load(fileName: ".env");
   
@@ -12,7 +12,8 @@ void main() async {
   const storage = FlutterSecureStorage();
   final token = await storage.read(key: 'auth_token');
   
-  runApp(MyApp(initialRoute: token != null ? '/dashboard' : '/login'));
+  final runner = appRunner ?? runApp;
+  runner(MyApp(initialRoute: token != null ? '/dashboard' : '/login'));
 }
 
 class MyApp extends StatelessWidget {
