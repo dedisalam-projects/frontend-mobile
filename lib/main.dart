@@ -4,7 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'screens/login_screen.dart';
 import 'screens/dashboard_screen.dart';
 
-void main() async {
+Future<void> main({void Function(Widget)? appRunner}) async {
   WidgetsFlutterBinding.ensureInitialized();
   await dotenv.load(fileName: ".env");
   
@@ -12,7 +12,8 @@ void main() async {
   final prefs = await SharedPreferences.getInstance();
   final token = prefs.getString('auth_token');
   
-  runApp(MyApp(initialRoute: token != null ? '/dashboard' : '/login'));
+  final runner = appRunner ?? runApp;
+  runner(MyApp(initialRoute: token != null ? '/dashboard' : '/login'));
 }
 
 class MyApp extends StatelessWidget {
@@ -35,7 +36,7 @@ class MyApp extends StatelessWidget {
       ),
       initialRoute: initialRoute,
       routes: {
-        '*login': (context) => const LoginScreen(),
+        '/login': (context) => const LoginScreen(),
         '/dashboard': (context) => const DashboardScreen(),
       },
     );

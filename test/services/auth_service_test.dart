@@ -1,9 +1,10 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:mocktail/mocktail.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
+
 import 'package:dash/services/auth_service.dart';
 
 class MockClient extends Mock implements http.Client {}
@@ -37,6 +38,32 @@ void main() {
       expect(result, isNull);
       final prefs = await SharedPreferences.getInstance();
       expect(prefs.getString('auth_token'), 'fake-token');
+
+      verify(() => mockClient.post(
+            Uri.parse('http://192.168.1.4:8080/api/auth/login'),
+            headers: {'Content-Type': 'application/json'},
+            body: jsonEncode({'email': 'test@test.com', 'password': 'password'}),
+          )).called(1);
+    });
+
+    test('login success with HTTP 201', () async {
+      when(() => mockClient.post(
+            any(),
+            headers: any(named: 'headers'),
+            body: any(named: 'body'),
+          )).thenAnswer((_) async => http.Response(
+            jsonEncode({
+              'success': true,
+              'data': {'accessToken': 'fake-token-201'}
+            }),
+            201,
+          ));
+
+      final result = await AuthService.login('test@test.com', 'password', client: mockClient);
+      
+      expect(result, isNull);
+      final prefs = await SharedPreferences.getInstance();
+      expect(prefs.getString('auth_token'), 'fake-token-201');
     });
 
     test('login success with token in cookie', () async {
@@ -151,5 +178,15 @@ void main() {
       final prefs = await SharedPreferences.getInstance();
       expect(prefs.getString('auth_token'), isNull);
     });
+
+    test('login uses fallback http.Client() when client and mockClient are null', () async {
+      await HttpOverrides.runZoned(() async {
+        AuthService.mockClient = null;
+        final result = await AuthService.login('test@test.com', 'password');
+        expect(result, isNotNull);
+      }, createHttpClient: (context) => throw const SocketException('Fast fail'));
+    });
   });
 }
+
+
